@@ -8,7 +8,7 @@ from flaskext.mysql import MySQL
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
 CORS(app)
-
+'''
 mysql = MySQL()
 app.config['MYSQL_DATABASE_USER'] = 'root'
 app.config['MYSQL_DATABASE_PASSWORD'] = ''
@@ -18,9 +18,9 @@ mysql.init_app(app)
 
 conn = mysql.connect()
 pointer = conn.cursor()
-
 pointer.execute("SELECT * FROM user")
 data = pointer.fetchmany()
+'''
 
 # Create some test data for our catalog in the form of a list of dictionaries.
 books = [
@@ -51,11 +51,11 @@ def home():
 @app.route('/api/v1/resources/books/all', methods=['GET'])
 def api_all():
     return jsonify(books)
-
+'''
 @app.route('/test', methods=['GET'])
 def api_test():
     return jsonify(data)
-
+'''
 
 @app.route('/api/v1/resources/books', methods=['GET'])
 def api_id():

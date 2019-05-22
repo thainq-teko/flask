@@ -35,7 +35,7 @@ def all_user():
 
 @app.route('/login', methods=['POST'])
 def login():
-    print(request)
+    print(request.form)
     return jsonify(result)
 
 @app.route('/test')

@@ -38,6 +38,8 @@ def login():
     req = request.get_json()
     idd = req["id"]
     name = req["username"]
+    pointer.execute("Select * from user where id = %s", idd)
+    print(pointer.fetchall())
     return jsonify({'stt': 200, 'data': { "id" : idd , "name" : name}})
 
 @app.route('/test')

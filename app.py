@@ -61,14 +61,17 @@ def register():
 
     name = req["username"]
     pw = req["password"]
+    email = req['email']
+    print name, pw, email
     pw_hashed = bcrypt.generate_password_hash(req["password"]).decode('utf-8').encode('ascii', 'ignore')
-    email = req['email'].encode('ascii', 'ignore')
+
+    # validate body request
 
     # check isExist username & email
-    pointer.execute("select id from user where username = %s", str(name))
+    pointer.execute("select id from user where username = %s", name)
     if len(pointer.fetchall()) > 0:
         return jsonify({'code': 401, 'message': "account existed!"})
-    pointer.execute("select id from user where email = %s", str(email))
+    pointer.execute("select id from user where email = %s", email)
     if len(pointer.fetchall()) > 0:
         return jsonify({'code': 401, 'message': "email existed!"})
 
@@ -94,9 +97,12 @@ def login():
     name = req["username"]
     pw = req["password"]
     # check db
-    pointer.execute("Select * from user where username = %s", name)
-    print(pointer.fetchall())
-    return jsonify({'stt': 200, 'data': { "name" : name}})
+    pointer.execute("Select password from user where username = %s", name)
+    passInDb = pointer.fetchone()
+    success = bcrypt.check_password_hash(passInDb[0], pw)
+    if success:
+        return jsonify({'stt': 200, 'message': "login success"})
+    return jsonify({'code': 401, 'message': "login failed"})
 
 
 @app.route('/test', methods=['POST'])

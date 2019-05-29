@@ -49,10 +49,21 @@ def all_user():
 @app.route('/register', methods=['POST'])
 def register():
     req = request.get_json()
+    # handle body request
+    if not req["username"] or len(req["username"]) == 0:
+        return jsonify({'code': 401, 'message': "username required!"})
+    if not req["password"] or len(req["password"]) == 0:
+        return jsonify({'code': 401, 'message': "password required!"})
+    if not req["email"] or len(req["email"]) == 0:
+        return jsonify({'code': 401, 'message': "email required!"})
+
+    # get body request
+
     name = req["username"]
     pw = req["password"]
     pw_hashed = bcrypt.generate_password_hash(req["password"]).decode('utf-8').encode('ascii', 'ignore')
     email = req['email'].encode('ascii', 'ignore')
+
     # check isExist username & email
     pointer.execute("select id from user where username = %s", str(name))
     if len(pointer.fetchall()) > 0:
@@ -60,17 +71,19 @@ def register():
     pointer.execute("select id from user where email = %s", str(email))
     if len(pointer.fetchall()) > 0:
         return jsonify({'code': 401, 'message': "email existed!"})
-    # sql query
+
+    # sql query for inserting data
     record_for_inserting = (name, pw_hashed, email)
     sql = "Insert into user (username, password, email) values (%s, %s, %s)"
     # print(record_for_inserting)
     pointer.execute(sql, record_for_inserting)
     conn.commit()
-    print ("Record inserted successfully into db")
+
+    # handle mailing
+
     msg = Message('Your account info', sender='accrac016@gmail.com', recipients=['thainq00@gmail.com'])
     msg.body = "username: " + name + " pass: " + pw
     mail.send(msg)
-
     return jsonify({'code': 200, 'message': "create account successfully"})
 
 

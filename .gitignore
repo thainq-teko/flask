@@ -3,3 +3,6 @@
 /lib
 /local
 /share
+
+configDB.py
+heroku.py

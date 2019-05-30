@@ -10,6 +10,9 @@ from flask_mail import Mail, Message
 import random
 import string
 
+import heroku
+import configDB
+
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
 
@@ -18,15 +21,15 @@ bcrypt = Bcrypt(app)
 mysql = MySQL()
 
 # config mysql connection
-# app.config['MYSQL_DATABASE_USER'] = 'teko'
-# app.config['MYSQL_DATABASE_PASSWORD'] = '1234'
-# app.config['MYSQL_DATABASE_DB'] = 'flask_db'
-# app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+# app.config['MYSQL_DATABASE_USER'] = configDB.name
+# app.config['MYSQL_DATABASE_PASSWORD'] = configDB.passw
+# app.config['MYSQL_DATABASE_DB'] = configDB.db
+# app.config['MYSQL_DATABASE_HOST'] = configDB.host
 
-app.config['MYSQL_DATABASE_USER'] = 'bf6588dce14074'
-app.config['MYSQL_DATABASE_PASSWORD'] = '196959bf'
-app.config['MYSQL_DATABASE_DB'] = 'heroku_a24e410b25d00ab'
-app.config['MYSQL_DATABASE_HOST'] = 'us-iron-auto-dca-02-a.cleardb.net'
+app.config['MYSQL_DATABASE_USER'] = heroku.name
+app.config['MYSQL_DATABASE_PASSWORD'] = heroku.passw
+app.config['MYSQL_DATABASE_DB'] = heroku.db
+app.config['MYSQL_DATABASE_HOST'] = heroku.host
 
 mysql.init_app(app)
 

@@ -7,6 +7,9 @@ from flaskext.mysql import MySQL
 from flask_bcrypt import Bcrypt 
 from flask_mail import Mail, Message
 
+import random
+import string
+
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
 
@@ -33,6 +36,7 @@ app.config['MAIL_PASSWORD'] = 'pa5512!@'
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 mail = Mail(app)
+
 '''
 @app.route('/allUser', methods=['GET'])
 def all_user():
@@ -105,10 +109,38 @@ def login():
     return jsonify({'code': 401, 'message': "login failed"})
 
 
+def generatePassword(length=5):
+    return ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(length))
+
+
+@app.route('/changePass', methods=['POST'])
+def forgotPass():
+    req = request.get_json()
+    name = req["username"]
+    email = req["email"]
+    # check db
+    pointer.execute("Select email from user where username = %s", name)
+    fetchDB = pointer.fetchone()
+    print fetchDB, email
+    current = fetchDB[0].encode('ascii','ignore')
+    if not fetchDB or len(fetchDB) == 0 or email != current:
+        return jsonify({'code': 404, 'message': 'username and email are not same!'})
+    new_pass = generatePassword(8)
+    hashed_new_pass = bcrypt.generate_password_hash(new_pass)
+    pointer.execute("update user set password = %s where email = %s", (hashed_new_pass.decode('utf-8').encode('ascii', 'ignore'), email))
+    conn.commit()
+    # handle mailing
+
+    msg = Message('Password changed! ', sender='accrac016@gmail.com', recipients=['thainq00@gmail.com'])
+    msg.body = "Your new password is: " + new_pass
+    mail.send(msg)
+    return jsonify({'code': 200, 'message': 'New password sent to your mail!'})
+
+
 @app.route('/test', methods=['POST'])
 def test():
     req = request.get_json()
     name = req["username"]
     pointer.execute("select id from user where username = %s", str(name))
     print(len(pointer.fetchall()))
-    return jsonify({'stt' : 200, 'data': { "auth": 'true'}})
+    return jsonify({'stt': 200, 'data': {"auth": 'true'}})

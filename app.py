@@ -102,8 +102,11 @@ def register():
 def login():
     # get body info
     req = request.get_json()
-    name = req["username"]
-    pw = req["password"]
+    name = req.get("username")
+    pw = req.get("password")
+    print name , pw
+    # name = req.["username"]
+    # pw = req.["password"]
     # check db
     pointer.execute("Select password from user where username = %s", name)
     passInDb = pointer.fetchone()

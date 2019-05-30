@@ -73,7 +73,7 @@ def register():
     name = req["username"]
     pw = req["password"]
     email = req['email']
-    print name, pw, email
+    print(name, pw, email)
     pw_hashed = bcrypt.generate_password_hash(req["password"]).decode('utf-8').encode('ascii', 'ignore')
 
     # validate body request
@@ -131,7 +131,7 @@ def forgotPass():
     pointer.execute("Select email from user where username = %s", name)
     fetchDB = pointer.fetchone()
     current = fetchDB[0].encode('ascii','ignore')
-    print current, email
+    print(current, email)
     if not fetchDB or len(fetchDB) == 0 or email != current:
         return jsonify({'code': 404, 'message': 'username and email are not same!'})
     new_pass = generatePassword(8)

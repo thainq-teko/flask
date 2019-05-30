@@ -18,11 +18,18 @@ bcrypt = Bcrypt(app)
 mysql = MySQL()
 
 # config mysql connection
-app.config['MYSQL_DATABASE_USER'] = 'teko'
-app.config['MYSQL_DATABASE_PASSWORD'] = '1234'
-app.config['MYSQL_DATABASE_DB'] = 'flask_db'
-app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+# app.config['MYSQL_DATABASE_USER'] = 'teko'
+# app.config['MYSQL_DATABASE_PASSWORD'] = '1234'
+# app.config['MYSQL_DATABASE_DB'] = 'flask_db'
+# app.config['MYSQL_DATABASE_HOST'] = 'localhost'
+
+app.config['MYSQL_DATABASE_USER'] = 'bf6588dce14074'
+app.config['MYSQL_DATABASE_PASSWORD'] = '196959bf'
+app.config['MYSQL_DATABASE_DB'] = 'heroku_a24e410b25d00ab'
+app.config['MYSQL_DATABASE_HOST'] = 'us-iron-auto-dca-02-a.cleardb.net'
+
 mysql.init_app(app)
+
 
 conn = mysql.connect()
 pointer = conn.cursor()
@@ -108,6 +115,8 @@ def login():
         return jsonify({'stt': 200, 'message': "login success"})
     return jsonify({'code': 401, 'message': "login failed"})
 
+# func for creating password
+
 
 def generatePassword(length=5):
     return ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(length))
@@ -121,8 +130,8 @@ def forgotPass():
     # check db
     pointer.execute("Select email from user where username = %s", name)
     fetchDB = pointer.fetchone()
-    print fetchDB, email
     current = fetchDB[0].encode('ascii','ignore')
+    print current, email
     if not fetchDB or len(fetchDB) == 0 or email != current:
         return jsonify({'code': 404, 'message': 'username and email are not same!'})
     new_pass = generatePassword(8)
@@ -130,7 +139,6 @@ def forgotPass():
     pointer.execute("update user set password = %s where email = %s", (hashed_new_pass.decode('utf-8').encode('ascii', 'ignore'), email))
     conn.commit()
     # handle mailing
-
     msg = Message('Password changed! ', sender='accrac016@gmail.com', recipients=['thainq00@gmail.com'])
     msg.body = "Your new password is: " + new_pass
     mail.send(msg)

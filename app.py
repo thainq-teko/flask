@@ -112,14 +112,13 @@ def login():
         return jsonify({'stt': 200, 'message': "login success"})
     return jsonify({'code': 401, 'message': "login failed"})
 
+
 # func for creating password
-
-
 def generatePassword(length=5):
     return ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(length))
 
 
-@app.route('/changePass', methods=['POST'])
+@app.route('/forgotPass', methods=['POST'])
 def forgotPass():
     req = request.get_json()
     name = req["username"]
@@ -133,7 +132,8 @@ def forgotPass():
         return jsonify({'code': 404, 'message': 'username and email are not same!'})
     new_pass = generatePassword(8)
     hashed_new_pass = bcrypt.generate_password_hash(new_pass)
-    pointer.execute("update user set password = %s where email = %s", (hashed_new_pass.decode('utf-8').encode('ascii', 'ignore'), email))
+    pointer.execute("update user set password = %s where email = %s",
+                    (hashed_new_pass.decode('utf-8').encode('ascii', 'ignore'), email))
     conn.commit()
     # handle mailing
     msg = Message('Password changed! ', sender='accrac016@gmail.com', recipients=['thainq00@gmail.com'])
@@ -142,10 +142,21 @@ def forgotPass():
     return jsonify({'code': 200, 'message': 'New password sent to your mail!'})
 
 
-@app.route('/test', methods=['POST'])
-def test():
+@app.route('/changePass', methods=['POST'])
+def changePass():
     req = request.get_json()
     name = req["username"]
-    pointer.execute("select id from user where username = %s", str(name))
-    print(len(pointer.fetchall()))
-    return jsonify({'stt': 200, 'data': {"auth": 'true'}})
+    pw = req["password"]
+    new_pw = req["newpassword"]
+    pointer.execute("Select password from user where username = %s", name)
+    passInDb = pointer.fetchone()
+    success = bcrypt.check_password_hash(passInDb[0], pw)
+    if not success:
+        return jsonify({'stt': 401, 'message': "wrong username or password"})
+    if pw == new_pw:
+        return jsonify({'stt': 401, 'message': "old password and new password must be different"})
+    hashed_new_pass = bcrypt.generate_password_hash(new_pw)
+    pointer.execute("update user set password = %s where username = %s",
+                    (hashed_new_pass.decode('utf-8').encode('ascii', 'ignore'), name))
+    conn.commit()
+    return jsonify({'code': 200, 'message': 'Change password successfully!'})

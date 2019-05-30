@@ -48,19 +48,12 @@ app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 mail = Mail(app)
 
-'''
-@app.route('/allUser', methods=['GET'])
-def all_user():
-    pointer.execute("SELECT * FROM user")
-    data = pointer.fetchall()
-    result = []
-    for i in data :
-        result.append({
-            'id' : i[0],
-            'name': i[1].encode('ascii','ignore') #convert unicode to string
-        })
-    return jsonify(result)
-'''
+
+@app.route('/', methods=['GET'])
+def home():
+    return "Hello, flask app works ! - Thainq"
+
+
 @app.route('/register', methods=['POST'])
 def register():
     req = request.get_json()

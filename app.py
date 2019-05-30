@@ -12,6 +12,7 @@ import string
 
 import heroku
 import configDB
+import configMail
 
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
@@ -39,10 +40,10 @@ pointer = conn.cursor()
 
 # config flask_mail
 mail = Mail(app)
-app.config['MAIL_SERVER']='smtp.gmail.com'
-app.config['MAIL_PORT'] = 465
-app.config['MAIL_USERNAME'] = 'accrac016@gmail.com'
-app.config['MAIL_PASSWORD'] = 'pa5512!@'
+app.config['MAIL_SERVER']= configMail.mail_server
+app.config['MAIL_PORT'] = configMail.mail_port
+app.config['MAIL_USERNAME'] = configMail.username
+app.config['MAIL_PASSWORD'] = configMail.password
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 mail = Mail(app)

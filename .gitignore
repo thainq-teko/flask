@@ -6,3 +6,4 @@
 
 configDB.py
 heroku.py
+configMail.py

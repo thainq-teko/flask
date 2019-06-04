@@ -117,8 +117,10 @@ def login():
 
 
 # func for creating password
-def generatePassword(length=5):
-    return ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(length))
+def generatePassword(length):
+    numStr = ''.join(random.choice(string.digits) for _ in range(2))
+    charStr = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase) for _ in range(length-2))
+    return charStr[-6:-2] + numStr + charStr[-2:]
 
 
 @app.route('/forgotPass', methods=['POST'])
@@ -139,14 +141,15 @@ def forgotPass():
         return jsonify({'code': 401, 'message': 'user and email not belong together!'})
     # make new password for user
     new_pass = generatePassword(8)
-    hashed_new_pass = bcrypt.generate_password_hash(new_pass)
-    pointer.execute("update user set password = %s where email = %s",
-                    (hashed_new_pass.decode('utf-8').encode('ascii', 'ignore'), email))
-    conn.commit()
-    # handle mailing
-    msg = Message('Password changed! ', sender='accrac016@gmail.com', recipients=['thainq00@gmail.com'])
-    msg.body = "Your new password is: " + new_pass
-    mail.send(msg)
+    print(new_pass)
+    # hashed_new_pass = bcrypt.generate_password_hash(new_pass)
+    # pointer.execute("update user set password = %s where email = %s",
+    #                 (hashed_new_pass.decode('utf-8').encode('ascii', 'ignore'), email))
+    # conn.commit()
+    # # handle mailing
+    # msg = Message('Password changed! ', sender='accrac016@gmail.com', recipients=['thainq00@gmail.com'])
+    # msg.body = "Your new password is: " + new_pass
+    # mail.send(msg)
     return jsonify({'code': 200, 'message': 'New password sent to your mail!'})
 
 

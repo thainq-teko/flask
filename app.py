@@ -22,11 +22,12 @@ bcrypt = Bcrypt(app)
 mysql = MySQL()
 
 # config mysql connection
+# uncomment 4 lines below to use database in local, with creditials configured in configDB.py
 # app.config['MYSQL_DATABASE_USER'] = configDB.name
 # app.config['MYSQL_DATABASE_PASSWORD'] = configDB.passw
 # app.config['MYSQL_DATABASE_DB'] = configDB.db
 # app.config['MYSQL_DATABASE_HOST'] = configDB.host
-
+# config db using heroku clearDB
 app.config['MYSQL_DATABASE_USER'] = heroku.name
 app.config['MYSQL_DATABASE_PASSWORD'] = heroku.passw
 app.config['MYSQL_DATABASE_DB'] = heroku.db

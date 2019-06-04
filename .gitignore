@@ -9,6 +9,3 @@
 
 db.sql
 *.pyc
-configDB.py
-heroku.py
-configMail.py

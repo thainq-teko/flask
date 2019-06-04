@@ -141,15 +141,14 @@ def forgotPass():
         return jsonify({'code': 401, 'message': 'user and email not belong together!'})
     # make new password for user
     new_pass = generatePassword(8)
-    print(new_pass)
-    # hashed_new_pass = bcrypt.generate_password_hash(new_pass)
-    # pointer.execute("update user set password = %s where email = %s",
-    #                 (hashed_new_pass.decode('utf-8').encode('ascii', 'ignore'), email))
-    # conn.commit()
-    # # handle mailing
-    # msg = Message('Password changed! ', sender='accrac016@gmail.com', recipients=['thainq00@gmail.com'])
-    # msg.body = "Your new password is: " + new_pass
-    # mail.send(msg)
+    hashed_new_pass = bcrypt.generate_password_hash(new_pass)
+    pointer.execute("update user set password = %s where email = %s",
+                    (hashed_new_pass.decode('utf-8').encode('ascii', 'ignore'), email))
+    conn.commit()
+    # handle mailing
+    msg = Message('Password changed! ', sender='accrac016@gmail.com', recipients=['thainq00@gmail.com'])
+    msg.body = "Your new password is: " + new_pass
+    mail.send(msg)
     return jsonify({'code': 200, 'message': 'New password sent to your mail!'})
 
 

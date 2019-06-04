@@ -3,7 +3,12 @@
 /lib
 /local
 /share
+/usr
+/ENV.tar.xz
+/.idea
 
+db.sql
+*.pyc
 configDB.py
 heroku.py
 configMail.py

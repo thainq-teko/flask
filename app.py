@@ -22,15 +22,15 @@ bcrypt = Bcrypt(app)
 mysql = MySQL()
 
 # config mysql connection
-app.config['MYSQL_DATABASE_USER'] = configDB.name
-app.config['MYSQL_DATABASE_PASSWORD'] = configDB.passw
-app.config['MYSQL_DATABASE_DB'] = configDB.db
-app.config['MYSQL_DATABASE_HOST'] = configDB.host
+# app.config['MYSQL_DATABASE_USER'] = configDB.name
+# app.config['MYSQL_DATABASE_PASSWORD'] = configDB.passw
+# app.config['MYSQL_DATABASE_DB'] = configDB.db
+# app.config['MYSQL_DATABASE_HOST'] = configDB.host
 
-# app.config['MYSQL_DATABASE_USER'] = heroku.name
-# app.config['MYSQL_DATABASE_PASSWORD'] = heroku.passw
-# app.config['MYSQL_DATABASE_DB'] = heroku.db
-# app.config['MYSQL_DATABASE_HOST'] = heroku.host
+app.config['MYSQL_DATABASE_USER'] = heroku.name
+app.config['MYSQL_DATABASE_PASSWORD'] = heroku.passw
+app.config['MYSQL_DATABASE_DB'] = heroku.db
+app.config['MYSQL_DATABASE_HOST'] = heroku.host
 
 mysql.init_app(app)
 

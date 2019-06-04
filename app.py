@@ -133,8 +133,6 @@ def forgotPass():
         return jsonify({'code': 404, 'message': 'username not found!'})
     # check email === username
     pointer.execute("Select email from user where username = %s", name)
-    if pointer.rowcount == 0:
-        return jsonify({'code': 404, 'message': 'email not found!'})
     fetchDB = pointer.fetchone()
     current = fetchDB[0].encode('ascii', 'ignore')
     if email != current:

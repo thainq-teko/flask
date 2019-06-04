@@ -105,7 +105,7 @@ def login():
     req = request.get_json()
     name = req.get("username")
     pw = req.get("password")
-    print name , pw
+    print(name, pw)
     # name = req.["username"]
     # pw = req.["password"]
     # check db

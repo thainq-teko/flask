@@ -22,15 +22,15 @@ bcrypt = Bcrypt(app)
 mysql = MySQL()
 
 # config mysql connection
-# app.config['MYSQL_DATABASE_USER'] = configDB.name
-# app.config['MYSQL_DATABASE_PASSWORD'] = configDB.passw
-# app.config['MYSQL_DATABASE_DB'] = configDB.db
-# app.config['MYSQL_DATABASE_HOST'] = configDB.host
+app.config['MYSQL_DATABASE_USER'] = configDB.name
+app.config['MYSQL_DATABASE_PASSWORD'] = configDB.passw
+app.config['MYSQL_DATABASE_DB'] = configDB.db
+app.config['MYSQL_DATABASE_HOST'] = configDB.host
 
-app.config['MYSQL_DATABASE_USER'] = heroku.name
-app.config['MYSQL_DATABASE_PASSWORD'] = heroku.passw
-app.config['MYSQL_DATABASE_DB'] = heroku.db
-app.config['MYSQL_DATABASE_HOST'] = heroku.host
+# app.config['MYSQL_DATABASE_USER'] = heroku.name
+# app.config['MYSQL_DATABASE_PASSWORD'] = heroku.passw
+# app.config['MYSQL_DATABASE_DB'] = heroku.db
+# app.config['MYSQL_DATABASE_HOST'] = heroku.host
 
 mysql.init_app(app)
 
@@ -124,15 +124,22 @@ def generatePassword(length=5):
 @app.route('/forgotPass', methods=['POST'])
 def forgotPass():
     req = request.get_json()
-    name = req["username"]
-    email = req["email"]
-    # check db
+    name = req.get("username")
+    email = req.get("email")
+    print(req)
+    # check username existed
+    pointer.execute("Select * from user where username = %s", name)
+    if pointer.rowcount == 0:
+        return jsonify({'code': 404, 'message': 'username not found!'})
+    # check email === username
     pointer.execute("Select email from user where username = %s", name)
+    if pointer.rowcount == 0:
+        return jsonify({'code': 404, 'message': 'email not found!'})
     fetchDB = pointer.fetchone()
-    current = fetchDB[0].encode('ascii','ignore')
-    print(current, email)
-    if not fetchDB or len(fetchDB) == 0 or email != current:
-        return jsonify({'code': 404, 'message': 'username and email are not same!'})
+    current = fetchDB[0].encode('ascii', 'ignore')
+    if email != current:
+        return jsonify({'code': 401, 'message': 'user and email not belong together!'})
+    # make new password for user
     new_pass = generatePassword(8)
     hashed_new_pass = bcrypt.generate_password_hash(new_pass)
     pointer.execute("update user set password = %s where email = %s",

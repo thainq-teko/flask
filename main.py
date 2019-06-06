@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import flask
-from flask import request, jsonify, json, make_response
+from flask import request, jsonify,  make_response
 from flask_cors import CORS
 
 from flaskext.mysql import MySQL
@@ -25,16 +25,16 @@ def create_app(config=None):
     mysql = MySQL()
 
     # config mysql connection
-    # uncomment 4 lines below to use database in local, with creditials configured in configDB.py
-    # app.config['MYSQL_DATABASE_USER'] = configDB.name
-    # app.config['MYSQL_DATABASE_PASSWORD'] = configDB.passw
-    # app.config['MYSQL_DATABASE_DB'] = configDB.db
-    # app.config['MYSQL_DATABASE_HOST'] = configDB.host
+    app.config['MYSQL_DATABASE_USER'] = configDB.name
+    app.config['MYSQL_DATABASE_PASSWORD'] = configDB.passw
+    app.config['MYSQL_DATABASE_DB'] = configDB.db
+    app.config['MYSQL_DATABASE_HOST'] = configDB.host
+
     # config db using heroku clearDB
-    app.config['MYSQL_DATABASE_USER'] = heroku.name
-    app.config['MYSQL_DATABASE_PASSWORD'] = heroku.passw
-    app.config['MYSQL_DATABASE_DB'] = heroku.db
-    app.config['MYSQL_DATABASE_HOST'] = heroku.host
+    # app.config['MYSQL_DATABASE_USER'] = heroku.name
+    # app.config['MYSQL_DATABASE_PASSWORD'] = heroku.passw
+    # app.config['MYSQL_DATABASE_DB'] = heroku.db
+    # app.config['MYSQL_DATABASE_HOST'] = heroku.host
 
     mysql.init_app(app)
 
@@ -105,18 +105,18 @@ def create_app(config=None):
         name = req.get("username")
         pw = req.get("password")
         if not name or not pw or (not name and not pw):
-            return make_response(jsonify({'message': "Both username anhd password are required!"}), 400)
+            return make_response(jsonify({'code': 400, 'message': "Both username anhd password are required!"}), 400)
         # check user exist
         pointer.execute("Select * from user where username = %s", name)
         if pointer.rowcount == 0:
-            return make_response(jsonify({'message': "Username not found"}), 404)
+            return make_response(jsonify({'code': 400, 'message': "Username not found"}), 404)
         # check db
         pointer.execute("Select password from user where username = %s", name)
         passInDb = pointer.fetchone()
         success = bcrypt.check_password_hash(passInDb[0], pw)
         if success:
             return jsonify({'code': 200, 'message': "login success"})
-        return jsonify({'code': 401, 'message': "login failed"})
+        return jsonify({'code': 401, 'message': "wrong password"})
 
     # func for creating password
     def generatePassword(length):
@@ -175,6 +175,5 @@ def create_app(config=None):
 
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 8000))
     app = create_app()
-    app.run(host="0.0.0.0", port=port)
+    app.run()

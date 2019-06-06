@@ -29,7 +29,10 @@ def test_login(app):
         data=json.dumps({"username": "thainq00", "password": "123456"}),
         content_type='application/json'
     )
+    data = res.get_json()
     assert res.status_code == 200
+    assert data.get('code') == 200
+    assert data.get('message') == 'login success'
 
 
 def test_login_2(app):

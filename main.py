@@ -60,11 +60,11 @@ def create_app(config=None):
         req = request.get_json()
         # handle body request
         if not req["username"] or len(req["username"]) == 0:
-            return jsonify({'code': 401, 'message': "username required!"})
+            return make_response(jsonify({'code': 400, 'message': "username required!"}),400)
         if not req["password"] or len(req["password"]) == 0:
-            return jsonify({'code': 401, 'message': "password required!"})
+            return make_response(jsonify({'code': 400, 'message': "password required!"}),400)
         if not req["email"] or len(req["email"]) == 0:
-            return jsonify({'code': 401, 'message': "email required!"})
+            return make_response(jsonify({'code': 400, 'message': "email required!"}),400)
 
         # get body request
 
@@ -79,10 +79,10 @@ def create_app(config=None):
         # check isExist username & email
         pointer.execute("select id from user where username = %s", name)
         if len(pointer.fetchall()) > 0:
-            return jsonify({'code': 401, 'message': "account existed!"})
+            return jsonify({'code': 400, 'message': "account existed!"})
         pointer.execute("select id from user where email = %s", email)
         if len(pointer.fetchall()) > 0:
-            return jsonify({'code': 401, 'message': "email existed!"})
+            return jsonify({'code': 400, 'message': "email existed!"})
 
         # sql query for inserting data
         record_for_inserting = (name, pw_hashed, email)
@@ -115,8 +115,8 @@ def create_app(config=None):
         passInDb = pointer.fetchone()
         success = bcrypt.check_password_hash(passInDb[0], pw)
         if success:
-            return jsonify({'code': 200, 'message': "login success"})
-        return jsonify({'code': 401, 'message': "wrong password"})
+            return make_response(jsonify({'code': 200, 'message': "login success"}), 200)
+        return make_response(jsonify({'code': 400, 'message': "wrong password"}), 400)
 
     # func for creating password
     def generatePassword(length):
@@ -133,13 +133,13 @@ def create_app(config=None):
         # check username existed
         pointer.execute("Select * from user where username = %s", name)
         if pointer.rowcount == 0:
-            return jsonify({'code': 404, 'message': 'username not found!'})
+            return make_response(jsonify({'code': 404, 'message': 'username not found!'}), 404)
         # check email === username
         pointer.execute("Select email from user where username = %s", name)
         fetchDB = pointer.fetchone()
         current = fetchDB[0].encode('ascii', 'ignore')
         if email != current:
-            return jsonify({'code': 401, 'message': 'user and email not belong together!'})
+            return make_response(jsonify({'code': 400, 'message': 'user and email not belong together!'}), 400)
         # make new password for user
         new_pass = generatePassword(8)
         hashed_new_pass = bcrypt.generate_password_hash(new_pass)
@@ -150,7 +150,7 @@ def create_app(config=None):
         msg = Message('Password changed! ', sender='accrac016@gmail.com', recipients=['thainq00@gmail.com'])
         msg.body = "Your new password is: " + new_pass
         mail.send(msg)
-        return jsonify({'code': 200, 'message': 'New password sent to your mail!'})
+        return make_response(jsonify({'code': 200, 'message': 'New password sent to your mail!'}), 200)
 
     @app.route('/changePass', methods=['POST'])
     def changePass():
@@ -162,14 +162,14 @@ def create_app(config=None):
         passInDb = pointer.fetchone()
         success = bcrypt.check_password_hash(passInDb[0], pw)
         if not success:
-            return jsonify({'stt': 401, 'message': "wrong username or password"})
+            return make_response(jsonify({'stt': 400, 'message': "wrong username or password"}), 400)
         if pw == new_pw:
-            return jsonify({'stt': 401, 'message': "old password and new password must be different"})
+            return make_response(jsonify({'stt': 400, 'message': "old password and new password must be different"}), 400)
         hashed_new_pass = bcrypt.generate_password_hash(new_pw)
         pointer.execute("update user set password = %s where username = %s",
                         (hashed_new_pass.decode('utf-8').encode('ascii', 'ignore'), name))
         conn.commit()
-        return jsonify({'code': 200, 'message': 'Change password successfully!'})
+        return make_response(jsonify({'code': 200, 'message': 'Change password successfully!'}), 200)
 
     return app
 

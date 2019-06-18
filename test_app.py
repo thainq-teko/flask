@@ -23,10 +23,17 @@ def test_register(app):
     assert res.status_code == 200
 
 
+def test_register_1(app):
+    res = app.post('/register',
+                   data=json.dumps({"username": "thainq05", "password": "1234", "email": "thainq00@gmail.com"}),
+                   content_type='application/json')
+    assert res.status_code == 200
+
+
 def test_login(app):
     res = app.post(
         '/login',
-        data=json.dumps({"username": "thainq00", "password": "123456"}),
+        data=json.dumps({"username": "thainq00", "password": "1"}),
         content_type='application/json'
     )
     data = res.get_json()
@@ -41,13 +48,31 @@ def test_login_2(app):
         data=json.dumps({"username": "thainq01", "password": "123456"}),
         content_type='application/json'
     )
-    assert res.status_code == 404
+    assert res.status_code == 400
 
 
 def test_login_3(app):
     res = app.post(
         '/login',
         data=json.dumps({"password": "123456"}),
+        content_type='application/json'
+    )
+    assert res.status_code == 400
+
+
+def test_login_4(app):
+    res = app.post(
+        '/login',
+        data=json.dumps({"username": "thainq01"}),
+        content_type='application/json'
+    )
+    assert res.status_code == 400
+
+
+def test_login_5(app):
+    res = app.post(
+        '/login',
+        data=json.dumps({}),
         content_type='application/json'
     )
     assert res.status_code == 400

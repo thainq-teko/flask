@@ -60,11 +60,11 @@ def create_app(config=None):
         req = request.get_json()
         # handle body request
         if not req["username"] or len(req["username"]) == 0:
-            return make_response(jsonify({'code': 400, 'message': "username required!"}),400)
+            return make_response(jsonify({'code': 400, 'message': "username required!"}), 400)
         if not req["password"] or len(req["password"]) == 0:
-            return make_response(jsonify({'code': 400, 'message': "password required!"}),400)
+            return make_response(jsonify({'code': 400, 'message': "password required!"}), 400)
         if not req["email"] or len(req["email"]) == 0:
-            return make_response(jsonify({'code': 400, 'message': "email required!"}),400)
+            return make_response(jsonify({'code': 400, 'message': "email required!"}), 400)
 
         # get body request
 
@@ -78,11 +78,11 @@ def create_app(config=None):
 
         # check isExist username & email
         pointer.execute("select id from user where username = %s", name)
-        if len(pointer.fetchall()) > 0:
-            return jsonify({'code': 400, 'message': "account existed!"})
+        if not len(pointer.fetchall()) > 0:
+            return make_response(jsonify({'code': 400, 'message': "account existed!"}), 400)
         pointer.execute("select id from user where email = %s", email)
         if len(pointer.fetchall()) > 0:
-            return jsonify({'code': 400, 'message': "email existed!"})
+            return make_response(jsonify({'code': 400, 'message': "email existed!"}), 400)
 
         # sql query for inserting data
         record_for_inserting = (name, pw_hashed, email)

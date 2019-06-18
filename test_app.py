@@ -18,16 +18,26 @@ def test_get_home(app):
 
 def test_register(app):
     res = app.post('/register',
-                   data=json.dumps({"username": "abc", "password": "1234", "email": "thainq00@gmail.com"}),
+                   data=json.dumps({"username": "thainq00", "password": "1234", "email": "thainq00@gmail.com"}),
                    content_type='application/json')
-    assert res.status_code == 200
+    assert res.status_code == 400
+    assert res.get_json().get('message') == "account existed!"
 
 
 def test_register_1(app):
     res = app.post('/register',
-                   data=json.dumps({"username": "thainq05", "password": "1234", "email": "thainq00@gmail.com"}),
+                   data=json.dumps({"username": "abcc", "password": "1234", "email": "thainq00@gmail.com"}),
+                   content_type='application/json')
+    assert res.status_code == 400
+    assert res.get_json().get('message') == "email existed!"
+
+
+def test_register_2(app):
+    res = app.post('/register',
+                   data=json.dumps({"username": "thainq03", "password": "1234", "email": "thainq03@gmail.com"}),
                    content_type='application/json')
     assert res.status_code == 200
+    assert res.get_json().get('message') == "create account successfully"
 
 
 def test_login(app):

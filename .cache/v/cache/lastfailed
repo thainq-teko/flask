@@ -13,5 +13,6 @@
   "lib/python2.7/site-packages/sqlalchemy/testing/suite/test_select.py": true, 
   "lib/python2.7/site-packages/sqlalchemy/testing/suite/test_sequence.py": true, 
   "lib/python2.7/site-packages/sqlalchemy/testing/suite/test_types.py": true, 
-  "lib/python2.7/site-packages/sqlalchemy/testing/suite/test_update_delete.py": true
+  "lib/python2.7/site-packages/sqlalchemy/testing/suite/test_update_delete.py": true, 
+  "test_teko/test_app.py": true
 }

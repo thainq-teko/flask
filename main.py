@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import flask
-from flask import request, jsonify,  make_response
+from flask import request, jsonify, make_response
 from flask_cors import CORS
 
 from flaskext.mysql import MySQL
@@ -78,7 +78,7 @@ def create_app(config=None):
 
         # check isExist username & email
         pointer.execute("select id from user where username = %s", name)
-        if not len(pointer.fetchall()) > 0:
+        if len(pointer.fetchall()) > 0:
             return make_response(jsonify({'code': 400, 'message': "account existed!"}), 400)
         pointer.execute("select id from user where email = %s", email)
         if len(pointer.fetchall()) > 0:
@@ -129,7 +129,14 @@ def create_app(config=None):
         req = request.get_json()
         name = req.get("username")
         email = req.get("email")
-        print(req)
+
+        # handle body request
+        if not name and not email:
+            return make_response(jsonify({'code': 400, 'message': "All fields required!"}), 400)
+        if not name or len(name) == 0:
+            return make_response(jsonify({'code': 400, 'message': "username required!"}), 400)
+        if not email or len(email) == 0:
+            return make_response(jsonify({'code': 400, 'message': "email required!"}), 400)
         # check username existed
         pointer.execute("Select * from user where username = %s", name)
         if pointer.rowcount == 0:
@@ -155,21 +162,40 @@ def create_app(config=None):
     @app.route('/changePass', methods=['POST'])
     def changePass():
         req = request.get_json()
-        name = req["username"]
-        pw = req["password"]
-        new_pw = req["newpassword"]
+        name = req.get("username")
+        pw = req.get("password")
+        new_pw = req.get("newpassword")
+
+        # handle body request
+        if not name and not pw and not new_pw:
+            return make_response(jsonify({'code': 400, 'message': "All fields required!"}), 400)
+        if not name or len(name) == 0:
+            return make_response(jsonify({'code': 400, 'message': "username required!"}), 400)
+        if not pw or len(pw) == 0:
+            return make_response(jsonify({'code': 400, 'message': "password required!"}), 400)
+        if not new_pw or len(new_pw) == 0:
+            return make_response(jsonify({'code': 400, 'message': "new password required!"}), 400)
         pointer.execute("Select password from user where username = %s", name)
         passInDb = pointer.fetchone()
         success = bcrypt.check_password_hash(passInDb[0], pw)
         if not success:
             return make_response(jsonify({'stt': 400, 'message': "wrong username or password"}), 400)
         if pw == new_pw:
-            return make_response(jsonify({'stt': 400, 'message': "old password and new password must be different"}), 400)
+            return make_response(jsonify({'stt': 400, 'message': "old password and new password must be different"}),
+                                 400)
         hashed_new_pass = bcrypt.generate_password_hash(new_pw)
         pointer.execute("update user set password = %s where username = %s",
                         (hashed_new_pass.decode('utf-8').encode('ascii', 'ignore'), name))
         conn.commit()
         return make_response(jsonify({'code': 200, 'message': 'Change password successfully!'}), 200)
+
+    @app.route('/delete_for_testing', methods=['POST'])
+    def delete():
+        req = request.get_json()
+        name = req["username"]
+        pointer.execute("delete from user where username = %s", name)
+        conn.commit()
+        return make_response(jsonify({'code': 200, 'message': request.get_json()}), 200)
 
     return app
 

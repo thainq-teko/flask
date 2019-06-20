@@ -2,9 +2,6 @@ import pytest
 from flask import json
 import main
 
-import configDB
-
-
 @pytest.fixture
 def app():
     app = main.create_app()
@@ -100,7 +97,6 @@ def test_login_5(app):
 #         content_type='application/json'
 #     )
 #     assert res.status_code == 200
-#     assert res.get_json().get('message') == "New password sent to your mail!"
 
 
 def test_forgotPass_2(app):
@@ -151,63 +147,3 @@ def test_forgotPass_6(app):
     )
     assert res.status_code == 400
     assert res.get_json().get('message') == "All fields required!"
-
-
-# def test_changePass_1(app):
-#     res = app.post(
-#         '/changePass',
-#         data=json.dumps({"username": "thainq00", "password": "1", "newpassword": "2"}),
-#         content_type='application/json'
-#     )
-#     assert res.status_code == 200
-#     assert res.get_json().get('message') == "Change password successfully!"
-
-
-def test_changePass_2(app):
-    res = app.post(
-        '/changePass',
-        data=json.dumps({"password": "1", "newpassword": "2"}),
-        content_type='application/json'
-    )
-    assert res.status_code == 400
-    assert res.get_json().get('message') == "username required!"
-
-
-def test_changePass_3(app):
-    res = app.post(
-        '/changePass',
-        data=json.dumps({"username": "thainq00", "newpassword": "2"}),
-        content_type='application/json'
-    )
-    assert res.status_code == 400
-    assert res.get_json().get('message') == "password required!"
-
-
-def test_changePass_4(app):
-    res = app.post(
-        '/changePass',
-        data=json.dumps({"username": "thainq00", "password": "1"}),
-        content_type='application/json'
-    )
-    assert res.status_code == 400
-    assert res.get_json().get('message') == "new password required!"
-
-
-def test_changePass_5(app):
-    res = app.post(
-        '/changePass',
-        data=json.dumps({"username": "thainq00", "password": "11", "newpassword": "2"}),
-        content_type='application/json'
-    )
-    assert res.status_code == 400
-    assert res.get_json().get('message') == "wrong username or password"
-
-
-def test_changePass_6(app):
-    res = app.post(
-        '/changePass',
-        data=json.dumps({"username": "thainq00", "password": "1", "newpassword": "1"}),
-        content_type='application/json'
-    )
-    assert res.status_code == 400
-    assert res.get_json().get('message') == "old password and new password must be different"

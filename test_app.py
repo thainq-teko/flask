@@ -2,7 +2,7 @@ import pytest
 from flask import json
 import main
 
-import configDB
+import message
 
 
 @pytest.fixture
@@ -23,7 +23,7 @@ def test_register(app):
                    data=json.dumps({"username": "thainq00", "password": "1234", "email": "thainq00@gmail.com"}),
                    content_type='application/json')
     assert res.status_code == 400
-    assert res.get_json().get('message') == "account existed!"
+    assert res.get_json().get('message') == message.ACOUNT_EXIST
 
 
 def test_register_1(app):
@@ -31,7 +31,7 @@ def test_register_1(app):
                    data=json.dumps({"username": "abcc", "password": "1234", "email": "thainq00@gmail.com"}),
                    content_type='application/json')
     assert res.status_code == 400
-    assert res.get_json().get('message') == "email existed!"
+    assert res.get_json().get('message') == message.EMAIL_EXIST
 
 
 # def test_register_2(app):
@@ -42,7 +42,7 @@ def test_register_1(app):
 #                    data=json.dumps({"username": "thainq03", "password": "1234", "email": "thainq03@gmail.com"}),
 #                    content_type='application/json')
 #     assert res.status_code == 200
-#     assert res.get_json().get('message') == "create account successfully"
+#     assert res.get_json().get('message') == message.CREATE_ACCOUNT
 
 
 def test_login(app):
@@ -54,7 +54,7 @@ def test_login(app):
     data = res.get_json()
     assert res.status_code == 200
     assert data.get('code') == 200
-    assert data.get('message') == 'login success'
+    assert data.get('message') == message.LOGIN_SUCCESS
 
 
 def test_login_2(app):
@@ -63,7 +63,9 @@ def test_login_2(app):
         data=json.dumps({"username": "thainq01", "password": "123456"}),
         content_type='application/json'
     )
+    data = res.get_json()
     assert res.status_code == 400
+    assert data.get('message') == message.WRONG_PASSWORD
 
 
 def test_login_3(app):
@@ -72,7 +74,9 @@ def test_login_3(app):
         data=json.dumps({"password": "123456"}),
         content_type='application/json'
     )
+    data = res.get_json()
     assert res.status_code == 400
+    assert data.get('message') == message.USERNAME_PASSWORD_REQUIRED
 
 
 def test_login_4(app):
@@ -81,7 +85,9 @@ def test_login_4(app):
         data=json.dumps({"username": "thainq01"}),
         content_type='application/json'
     )
+    data = res.get_json()
     assert res.status_code == 400
+    assert data.get('message') == message.USERNAME_PASSWORD_REQUIRED
 
 
 def test_login_5(app):
@@ -90,7 +96,9 @@ def test_login_5(app):
         data=json.dumps({}),
         content_type='application/json'
     )
+    data = res.get_json()
     assert res.status_code == 400
+    assert data.get('message') == message.USERNAME_PASSWORD_REQUIRED
 
 
 # def test_forgotPass_1(app):
@@ -100,7 +108,7 @@ def test_login_5(app):
 #         content_type='application/json'
 #     )
 #     assert res.status_code == 200
-#     assert res.get_json().get('message') == "New password sent to your mail!"
+#     assert res.get_json().get('message') == message.SEND_NEW_PASS
 
 
 def test_forgotPass_2(app):
@@ -110,7 +118,7 @@ def test_forgotPass_2(app):
         content_type='application/json'
     )
     assert res.status_code == 400
-    assert res.get_json().get('message') == "user and email not belong together!"
+    assert res.get_json().get('message') == message.USERNAME_EMAIL_WRONG
 
 
 def test_forgotPass_3(app):
@@ -120,7 +128,7 @@ def test_forgotPass_3(app):
         content_type='application/json'
     )
     assert res.status_code == 404
-    assert res.get_json().get('message') == "username not found!"
+    assert res.get_json().get('message') == message.USERNAME_NOT_FOUND
 
 
 def test_forgotPass_4(app):
@@ -130,7 +138,7 @@ def test_forgotPass_4(app):
         content_type='application/json'
     )
     assert res.status_code == 400
-    assert res.get_json().get('message') == "email required!"
+    assert res.get_json().get('message') == message.EMAIL_REQUIRED
 
 
 def test_forgotPass_5(app):
@@ -140,8 +148,7 @@ def test_forgotPass_5(app):
         content_type='application/json'
     )
     assert res.status_code == 400
-    assert res.get_json().get('message') == "username required!"
-
+    assert res.get_json().get('message') == message.USERNAME_REQUIRED
 
 def test_forgotPass_6(app):
     res = app.post(
@@ -150,7 +157,7 @@ def test_forgotPass_6(app):
         content_type='application/json'
     )
     assert res.status_code == 400
-    assert res.get_json().get('message') == "All fields required!"
+    assert res.get_json().get('message') == message.ALL_FIELDS_REQUIRED
 
 
 # def test_changePass_1(app):
@@ -160,7 +167,7 @@ def test_forgotPass_6(app):
 #         content_type='application/json'
 #     )
 #     assert res.status_code == 200
-#     assert res.get_json().get('message') == "Change password successfully!"
+#     assert res.get_json().get('message') == message.CHANGE_PASSWORD_SUCCESS
 
 
 def test_changePass_2(app):
@@ -170,7 +177,7 @@ def test_changePass_2(app):
         content_type='application/json'
     )
     assert res.status_code == 400
-    assert res.get_json().get('message') == "username required!"
+    assert res.get_json().get('message') == message.USERNAME_REQUIRED
 
 
 def test_changePass_3(app):
@@ -180,7 +187,7 @@ def test_changePass_3(app):
         content_type='application/json'
     )
     assert res.status_code == 400
-    assert res.get_json().get('message') == "password required!"
+    assert res.get_json().get('message') == message.PASSWORD_REQUIRED
 
 
 def test_changePass_4(app):
@@ -190,7 +197,7 @@ def test_changePass_4(app):
         content_type='application/json'
     )
     assert res.status_code == 400
-    assert res.get_json().get('message') == "new password required!"
+    assert res.get_json().get('message') == message.NEW_PASSWORD_REQUIRED
 
 
 def test_changePass_5(app):
@@ -200,7 +207,7 @@ def test_changePass_5(app):
         content_type='application/json'
     )
     assert res.status_code == 400
-    assert res.get_json().get('message') == "wrong username or password"
+    assert res.get_json().get('message') == message.WRONG_USERNAME_PASSWORD
 
 
 def test_changePass_6(app):
@@ -210,4 +217,4 @@ def test_changePass_6(app):
         content_type='application/json'
     )
     assert res.status_code == 400
-    assert res.get_json().get('message') == "old password and new password must be different"
+    assert res.get_json().get('message') == message.OLD_NEW_PASSWORD_DIFFERENT

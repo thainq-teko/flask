@@ -14,6 +14,7 @@ from config import configMail, configDB
 
 import message
 
+
 def create_app(config=None):
     app = flask.Flask(__name__)
     app.config["DEBUG"] = True

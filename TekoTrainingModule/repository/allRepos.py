@@ -1,6 +1,6 @@
 import pymysql
 
-from config import configDB
+from TekoTrainingModule.config import configDB
 
 db = pymysql.connect(configDB.host, configDB.name, configDB.passw, configDB.db)
 

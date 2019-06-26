@@ -7,14 +7,11 @@ from flaskext.mysql import MySQL
 from flask_bcrypt import Bcrypt
 from flask_mail import Mail, Message
 
-import random
-import string
+from TekoTrainingModule.config import configMail, configDB
+from TekoTrainingModule.helpers import generateRandomPass
+from TekoTrainingModule.repository import allRepos
 
-from config import configMail, configDB
-from helpers import generateRandomPass
-from repository import allRepos
-
-import message
+from TekoTrainingModule import message
 
 
 def create_app():

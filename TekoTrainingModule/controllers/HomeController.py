@@ -1,12 +1,22 @@
 from TekoTrainingModule import app
-from flask import request, jsonify, make_response
+from TekoTrainingModule.repository import allRepos
+from TekoTrainingModule.helpers import message
+from flask_bcrypt import Bcrypt
+from flask_mail import Mail, Message
+
+bcrypt = Bcrypt(app)
+mail = Mail(app)
+
 
 @app.route('/', methods=['GET'])
 def home():
     return "Hello, flask app works ! - Thainq"
 
 
-@app.route('/register', methods=['POST'])
+from flask import request, jsonify, make_response
+
+
+@home.route('/register', methods=['POST'])
 def register():
     req = request.get_json()
     # handle body request

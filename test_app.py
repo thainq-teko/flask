@@ -2,7 +2,7 @@ import pytest
 from flask import json
 import main
 
-from TekoTrainingModule import message
+from TekoTrainingModule.helpers import message
 
 
 @pytest.fixture

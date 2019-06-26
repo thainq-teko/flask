@@ -8,10 +8,8 @@ from flask_bcrypt import Bcrypt
 from flask_mail import Mail, Message
 
 from TekoTrainingModule.config import configMail, configDB
-from TekoTrainingModule.helpers import generateRandomPass
+from TekoTrainingModule.helpers import generateRandomPass, message
 from TekoTrainingModule.repository import allRepos
-
-from TekoTrainingModule import message
 
 
 def create_app():

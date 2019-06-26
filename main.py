@@ -11,11 +11,13 @@ import random
 import string
 
 from config import configMail, configDB
+from helpers import generateRandomPass
+from repository import allRepos
 
 import message
 
 
-def create_app(config=None):
+def create_app():
     app = flask.Flask(__name__)
     app.config["DEBUG"] = True
 
@@ -28,12 +30,6 @@ def create_app(config=None):
     app.config['MYSQL_DATABASE_PASSWORD'] = configDB.passw
     app.config['MYSQL_DATABASE_DB'] = configDB.db
     app.config['MYSQL_DATABASE_HOST'] = configDB.host
-
-    # config db using heroku clearDB
-    # app.config['MYSQL_DATABASE_USER'] = heroku.name
-    # app.config['MYSQL_DATABASE_PASSWORD'] = heroku.passw
-    # app.config['MYSQL_DATABASE_DB'] = heroku.db
-    # app.config['MYSQL_DATABASE_HOST'] = heroku.host
 
     mysql.init_app(app)
 
@@ -65,34 +61,22 @@ def create_app(config=None):
         if not req["email"] or len(req["email"]) == 0:
             return make_response(jsonify({'code': 400, 'message': message.EMAIL_REQUIRED}), 400)
 
-        # get body request
-
         name = req["username"]
         pw = req["password"]
         email = req['email']
-        print(name, pw, email)
-        pw_hashed = bcrypt.generate_password_hash(req["password"]).decode('utf-8').encode('ascii', 'ignore')
-
-        # validate body request
 
         # check isExist username & email
-        pointer.execute("select id from user where username = %s", name)
-        if len(pointer.fetchall()) > 0:
+        if len(allRepos.select_id_by_username(name)) > 0:
             return make_response(jsonify({'code': 400, 'message': message.ACOUNT_EXIST}), 400)
-        pointer.execute("select id from user where email = %s", email)
-        if len(pointer.fetchall()) > 0:
+        if len(allRepos.select_id_by_email(email)) > 0:
             return make_response(jsonify({'code': 400, 'message': message.EMAIL_EXIST}), 400)
 
-        # sql query for inserting data
+        pw_hashed = bcrypt.generate_password_hash(req["password"]).decode('utf-8').encode('ascii', 'ignore')
+
         record_for_inserting = (name, pw_hashed, email)
-        sql = "Insert into user (username, password, email) values (%s, %s, %s)"
-        # print(record_for_inserting)
-        pointer.execute(sql, record_for_inserting)
-        conn.commit()
+        allRepos.insert_for_register(record_for_inserting)
 
-        # handle mailing
-
-        msg = Message('Your account info', sender='accrac016@gmail.com', recipients=['thainq00@gmail.com'])
+        msg = Message('Your account info', sender='accrac016@gmail.com', recipients=[email])
         msg.body = "username: " + name + " pass: " + pw
         mail.send(msg)
         return jsonify({'code': 200, 'message': message.CREATE_ACCOUNT})
@@ -106,22 +90,15 @@ def create_app(config=None):
         if not name or not pw or (not name and not pw):
             return make_response(jsonify({'code': 400, 'message': message.USERNAME_PASSWORD_REQUIRED}), 400)
         # check user exist
-        pointer.execute("Select * from user where username = %s", name)
-        if pointer.rowcount == 0:
+        if allRepos.select_user_by_username(name).rowcount == 0:
             return make_response(jsonify({'code': 400, 'message': message.USERNAME_NOT_FOUND}), 404)
         # check db
-        pointer.execute("Select password from user where username = %s", name)
-        passInDb = pointer.fetchone()
+        cursor = allRepos.select_password_by_username(name)
+        passInDb = cursor.fetchone()
         success = bcrypt.check_password_hash(passInDb[0], pw)
         if success:
             return make_response(jsonify({'code': 200, 'message': message.LOGIN_SUCCESS}), 200)
         return make_response(jsonify({'code': 400, 'message': message.WRONG_PASSWORD}), 400)
-
-    # func for creating password
-    def generatePassword(length):
-        numStr = ''.join(random.choice(string.digits) for _ in range(2))
-        charStr = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase) for _ in range(length - 2))
-        return charStr[-6:-2] + numStr + charStr[-2:]
 
     @app.route('/forgotPass', methods=['POST'])
     def forgotPass():
@@ -137,21 +114,18 @@ def create_app(config=None):
         if not email or len(email) == 0:
             return make_response(jsonify({'code': 400, 'message': message.EMAIL_REQUIRED}), 400)
         # check username existed
-        pointer.execute("Select * from user where username = %s", name)
-        if pointer.rowcount == 0:
+        if allRepos.select_password_by_username(name).rowcount == 0:
             return make_response(jsonify({'code': 404, 'message': message.USERNAME_NOT_FOUND}), 404)
         # check email === username
-        pointer.execute("Select email from user where username = %s", name)
-        fetchDB = pointer.fetchone()
+        cursor = allRepos.select_email_by_username(name)
+        fetchDB = cursor.fetchone()
         current = fetchDB[0].encode('ascii', 'ignore')
         if email != current:
             return make_response(jsonify({'code': 400, 'message': message.USERNAME_EMAIL_WRONG}), 400)
         # make new password for user
-        new_pass = generatePassword(8)
+        new_pass = generateRandomPass.generatePassword(8)
         hashed_new_pass = bcrypt.generate_password_hash(new_pass)
-        pointer.execute("update user set password = %s where email = %s",
-                        (hashed_new_pass.decode('utf-8').encode('ascii', 'ignore'), email))
-        conn.commit()
+        allRepos.update_password(hashed_new_pass, email)
         # handle mailing
         msg = Message('Password changed! ', sender='accrac016@gmail.com', recipients=['thainq00@gmail.com'])
         msg.body = "Your new password is: " + new_pass
@@ -174,8 +148,8 @@ def create_app(config=None):
             return make_response(jsonify({'code': 400, 'message': message.PASSWORD_REQUIRED}), 400)
         if not new_pw or len(new_pw) == 0:
             return make_response(jsonify({'code': 400, 'message': message.NEW_PASSWORD_REQUIRED}), 400)
-        pointer.execute("Select password from user where username = %s", name)
-        passInDb = pointer.fetchone()
+
+        passInDb = allRepos.select_password_by_username(name).fetchone()
         success = bcrypt.check_password_hash(passInDb[0], pw)
         if not success:
             return make_response(jsonify({'stt': 400, 'message': message.WRONG_USERNAME_PASSWORD}), 400)
@@ -183,9 +157,7 @@ def create_app(config=None):
             return make_response(jsonify({'stt': 400, 'message': message.OLD_NEW_PASSWORD_DIFFERENT}),
                                  400)
         hashed_new_pass = bcrypt.generate_password_hash(new_pw)
-        pointer.execute("update user set password = %s where username = %s",
-                        (hashed_new_pass.decode('utf-8').encode('ascii', 'ignore'), name))
-        conn.commit()
+        allRepos.update_password_by_username(hashed_new_pass, name)
         return make_response(jsonify({'code': 200, 'message': message.CHANGE_PASSWORD_SUCCESS}), 200)
 
     @app.route('/delete_for_testing', methods=['POST'])

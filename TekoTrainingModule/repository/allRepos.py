@@ -5,6 +5,8 @@ from TekoTrainingModule.config import configDB
 db = pymysql.connect(configDB.host, configDB.name, configDB.passw, configDB.db)
 
 
+# Raw sql, now swiched to use ORM
+
 def select_id_by_username(username):
     cursor = db.cursor()
     cursor.execute("select id from user where username = %s", username)

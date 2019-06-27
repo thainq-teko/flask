@@ -1,10 +1,18 @@
 from TekoTrainingModule import app
-from TekoTrainingModule.repository import allRepos
+from TekoTrainingModule.config import configMail
+from TekoTrainingModule.repository import AuthRepository
 from TekoTrainingModule.helpers import message
 from flask_bcrypt import Bcrypt
 from flask_mail import Mail, Message
+from flask import request, jsonify, make_response
 
 bcrypt = Bcrypt(app)
+app.config['MAIL_SERVER'] = configMail.mail_server
+app.config['MAIL_PORT'] = configMail.mail_port
+app.config['MAIL_USERNAME'] = configMail.username
+app.config['MAIL_PASSWORD'] = configMail.password
+app.config['MAIL_USE_TLS'] = False
+app.config['MAIL_USE_SSL'] = True
 mail = Mail(app)
 
 
@@ -13,10 +21,7 @@ def home():
     return "Hello, flask app works ! - Thainq"
 
 
-from flask import request, jsonify, make_response
-
-
-@home.route('/register', methods=['POST'])
+@app.route('/register', methods=['POST'])
 def register():
     req = request.get_json()
     # handle body request
@@ -32,15 +37,13 @@ def register():
     email = req['email']
 
     # check isExist username & email
-    if len(allRepos.select_id_by_username(name)) > 0:
+    if AuthRepository.get_id_by_username(name) is not None:
         return make_response(jsonify({'code': 400, 'message': message.ACOUNT_EXIST}), 400)
-    if len(allRepos.select_id_by_email(email)) > 0:
+    if AuthRepository.get_id_by_email(email) is not None:
         return make_response(jsonify({'code': 400, 'message': message.EMAIL_EXIST}), 400)
 
     pw_hashed = bcrypt.generate_password_hash(req["password"]).decode('utf-8').encode('ascii', 'ignore')
-
-    record_for_inserting = (name, pw_hashed, email)
-    allRepos.insert_for_register(record_for_inserting)
+    AuthRepository.add_user(name, email, pw_hashed)
 
     msg = Message('Your account info', sender='accrac016@gmail.com', recipients=[email])
     msg.body = "username: " + name + " pass: " + pw

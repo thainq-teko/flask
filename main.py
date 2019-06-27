@@ -71,7 +71,7 @@ def create_app():
         record_for_inserting = (name, pw_hashed, email)
         allRepos.insert_for_register(record_for_inserting)
 
-        msg = Message('Your account info', sender='accrac016@gmail.com', recipients=[email])
+        msg = Message('Your account info', sender='accrac016@gmail.com', recipients=['thai.nq@teko.vn'])
         msg.body = "username: " + name + " pass: " + pw
         mail.send(msg)
         return jsonify({'code': 200, 'message': message.CREATE_ACCOUNT})

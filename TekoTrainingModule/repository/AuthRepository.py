@@ -41,5 +41,13 @@ def get_email_by_username(username):
     return res
 
 
-# def change_pass(password, email):
-#     session.query(User).filter(User.email == email).update()
+def forgot_pass(password, email):
+    session.query(User).filter(User.email == email).update({User.password: password})
+    session.commit()
+    return 1
+
+
+def change_pass(password, username):
+    session.query(User).filter(User.username == username).update({User.password: password})
+    session.commit()
+    return 1

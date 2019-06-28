@@ -1,5 +1,5 @@
 from TekoTrainingModule import app
-from TekoTrainingModule.repository import allRepos
+from TekoTrainingModule.repository import allRepos, AuthRepository
 from TekoTrainingModule.helpers import message, generateRandomPass
 from flask_bcrypt import Bcrypt
 from flask_mail import Mail, Message
@@ -18,11 +18,10 @@ def login():
     if not name or not pw or (not name and not pw):
         return make_response(jsonify({'code': 400, 'message': message.USERNAME_PASSWORD_REQUIRED}), 400)
     # check user exist
-    if allRepos.select_user_by_username(name).rowcount == 0:
+    if AuthRepository.get_user_by_username(name) is None:
         return make_response(jsonify({'code': 400, 'message': message.USERNAME_NOT_FOUND}), 404)
     # check db
-    cursor = allRepos.select_password_by_username(name)
-    passInDb = cursor.fetchone()
+    passInDb = AuthRepository.get_password_by_username(name)
     success = bcrypt.check_password_hash(passInDb[0], pw)
     if success:
         return make_response(jsonify({'code': 200, 'message': message.LOGIN_SUCCESS}), 200)
@@ -43,18 +42,17 @@ def forgotPass():
     if not email or len(email) == 0:
         return make_response(jsonify({'code': 400, 'message': message.EMAIL_REQUIRED}), 400)
     # check username existed
-    if allRepos.select_password_by_username(name).rowcount == 0:
+    if AuthRepository.get_password_by_username(name) is None:
         return make_response(jsonify({'code': 404, 'message': message.USERNAME_NOT_FOUND}), 404)
     # check email === username
-    cursor = allRepos.select_email_by_username(name)
-    fetchDB = cursor.fetchone()
+    fetchDB = AuthRepository.get_email_by_username(name)
     current = fetchDB[0].encode('ascii', 'ignore')
     if email != current:
         return make_response(jsonify({'code': 400, 'message': message.USERNAME_EMAIL_WRONG}), 400)
     # make new password for user
     new_pass = generateRandomPass.generatePassword(8)
     hashed_new_pass = bcrypt.generate_password_hash(new_pass)
-    allRepos.update_password(hashed_new_pass, email)
+    AuthRepository.forgot_pass(hashed_new_pass, email)
     # handle mailing
     msg = Message('Password changed! ', sender='accrac016@gmail.com', recipients=['thainq00@gmail.com'])
     msg.body = "Your new password is: " + new_pass
@@ -79,7 +77,7 @@ def changePass():
     if not new_pw or len(new_pw) == 0:
         return make_response(jsonify({'code': 400, 'message': message.NEW_PASSWORD_REQUIRED}), 400)
 
-    passInDb = allRepos.select_password_by_username(name).fetchone()
+    passInDb = AuthRepository.get_password_by_username(name)
     success = bcrypt.check_password_hash(passInDb[0], pw)
     if not success:
         return make_response(jsonify({'stt': 400, 'message': message.WRONG_USERNAME_PASSWORD}), 400)
@@ -88,4 +86,5 @@ def changePass():
                              400)
     hashed_new_pass = bcrypt.generate_password_hash(new_pw)
     allRepos.update_password_by_username(hashed_new_pass, name)
+    AuthRepository.change_pass(hashed_new_pass, name)
     return make_response(jsonify({'code': 200, 'message': message.CHANGE_PASSWORD_SUCCESS}), 200)

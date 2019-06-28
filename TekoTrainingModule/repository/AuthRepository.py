@@ -15,7 +15,7 @@ def get_id_by_username(name):
 
 
 def get_id_by_email(email):
-    res = session.query(User.id).filter_by(username=email).one_or_none()
+    res = session.query(User.id).filter_by(email=email).one_or_none()
     return res
 
 
